@@ -33,8 +33,8 @@ export function PorteriaSalida() {
       } else {
         setResultados(res)
       }
-    } catch {
-      setError('Error al buscar. Intentá de nuevo.')
+    } catch (e) {
+      setError(`Error al buscar "${val}": ${e?.message ?? 'Intentá de nuevo.'}`)
     } finally {
       setLoading(false)
     }
@@ -73,16 +73,16 @@ export function PorteriaSalida() {
           <>
             {mostrarScanner ? (
               <QrScanner
-                onResult={(texto) => {
-                  console.log('QR leído:', texto) 
-                  setCodigo(texto)
-                  setMostrarScanner(false)
-                  buscar(texto)
-                }}
-                onError={() => {
-                  setMostrarScanner(false)
-                  setError('No se pudo acceder a la cámara. Verificá los permisos.')
-                }}
+              onResult={(texto) => {
+                console.log('QR leído:', texto)
+                setCodigo(texto)
+                setMostrarScanner(false)
+                buscar(texto)
+              }}
+              onError={(err) => {
+                setMostrarScanner(false)
+                setError(`Error cámara: ${err?.message ?? err}`)
+              }}
               />
             ) : (
               <div
