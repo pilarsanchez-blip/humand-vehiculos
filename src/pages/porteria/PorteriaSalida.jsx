@@ -72,10 +72,10 @@ export function PorteriaSalida() {
         <div style={{ display: ticket || confirmado ? 'none' : 'block' }}>
           {mostrarScanner ? (
             <QrScanner
-              onResult={(texto) => {
-                setMostrarScanner(false)
-                buscar(texto)
-              }}
+            onResult={(texto) => {
+              buscar(texto)
+              setMostrarScanner(false)
+            }}
               onError={(err) => {
                 setMostrarScanner(false)
                 setError(`Error cámara: ${err?.message ?? err}`)
