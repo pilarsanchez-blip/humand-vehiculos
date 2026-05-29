@@ -141,10 +141,15 @@ export async function cerrarTicket(id, kmFinal, observaciones) {
 }
 
 export async function buscarTicketsPorteria(codigo) {
+  // Extraer código si el QR contiene una URL
+  // Ej: "https://app.com/ticket/VEH-2026-0001" → "VEH-2026-0001"
+  const match = codigo.match(/VEH-\d{4}-\d+/i)
+  const codigoLimpio = match ? match[0].toUpperCase() : codigo.toUpperCase()
+
   const { data, error } = await supabase
     .from('tickets')
     .select('*')
-    .ilike('id', `%${codigo}%`)
+    .ilike('id', `%${codigoLimpio}%`)
     .not('estado', 'eq', 'CERRADO')
     .order('ts_solicitud', { ascending: false })
     .limit(5)
