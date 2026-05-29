@@ -2,27 +2,30 @@ import { useState } from 'react'
 import { useUsuario } from '../../hooks/useUsuario'
 import { buscarTicketsPorteria, confirmarSalida } from '../../lib/tickets'
 import { PageHeader, Btn, Field, Input, SummaryCard, SummaryRow, StatusBadge, Banner, Spinner } from '../../components/UI'
+import { QrScanner } from '../../components/QrScanner/QrScanner'
 import styles from './Porteria.module.css'
 
 export function PorteriaSalida() {
   const usuario = useUsuario()
-  const [codigo,     setCodigo]     = useState('')
-  const [resultados, setResultados] = useState([])
-  const [ticket,     setTicket]     = useState(null)
-  const [loading,    setLoading]    = useState(false)
-  const [saving,     setSaving]     = useState(false)
-  const [error,      setError]      = useState('')
-  const [confirmado, setConfirmado] = useState(false)
+  const [codigo,         setCodigo]         = useState('')
+  const [resultados,     setResultados]     = useState([])
+  const [ticket,         setTicket]         = useState(null)
+  const [loading,        setLoading]        = useState(false)
+  const [saving,         setSaving]         = useState(false)
+  const [error,          setError]          = useState('')
+  const [confirmado,     setConfirmado]     = useState(false)
+  const [mostrarScanner, setMostrarScanner] = useState(false)
 
-  async function buscar() {
-    if (!codigo.trim()) return
+  async function buscar(codigoParam) {
+    const val = (codigoParam ?? codigo).trim().toUpperCase()
+    if (!val) return
     setLoading(true)
     setError('')
     setTicket(null)
     setResultados([])
     setConfirmado(false)
     try {
-      const res = await buscarTicketsPorteria(codigo.trim().toUpperCase())
+      const res = await buscarTicketsPorteria(val)
       if (res.length === 0) {
         setError('No se encontró ningún ticket con ese código.')
       } else if (res.length === 1) {
@@ -56,6 +59,7 @@ export function PorteriaSalida() {
     setResultados([])
     setConfirmado(false)
     setError('')
+    setMostrarScanner(false)
   }
 
   return (
@@ -67,12 +71,32 @@ export function PorteriaSalida() {
         {/* BÚSQUEDA */}
         {!ticket && !confirmado && (
           <>
-            <div className={styles.scanArea}>
-              <div className={styles.scanIcon}>📷</div>
-              <p className={styles.scanText}>Escaneá el QR del colaborador</p>
-              <p className={styles.scanSub}>O ingresá el código manualmente</p>
-            </div>
+            {mostrarScanner ? (
+              <QrScanner
+                onResult={(texto) => {
+                  setCodigo(texto)
+                  setMostrarScanner(false)
+                  buscar(texto)
+                }}
+                onError={() => {
+                  setMostrarScanner(false)
+                  setError('No se pudo acceder a la cámara. Verificá los permisos.')
+                }}
+              />
+            ) : (
+              <div
+                className={styles.scanArea}
+                onClick={() => setMostrarScanner(true)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className={styles.scanIcon}>📷</div>
+                <p className={styles.scanText}>Tocá para escanear el QR</p>
+                <p className={styles.scanSub}>O ingresá el código manualmente</p>
+              </div>
+            )}
+
             <div className={styles.orDiv}>o</div>
+
             <Field label="Código de ticket">
               <div className={styles.searchRow}>
                 <Input
@@ -81,13 +105,13 @@ export function PorteriaSalida() {
                   placeholder="Ej: VEH-2026-0001"
                   onKeyDown={e => e.key === 'Enter' && buscar()}
                 />
-                <Btn variant="primary" onClick={buscar}>Buscar</Btn>
+                <Btn variant="primary" onClick={() => buscar()}>Buscar</Btn>
               </div>
             </Field>
+
             {loading && <Spinner />}
             {error   && <Banner type="error" icon="⚠️">{error}</Banner>}
 
-            {/* Lista de resultados */}
             {resultados.length > 1 && (
               <>
                 <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-lighter)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 10 }}>
