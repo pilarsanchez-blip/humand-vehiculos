@@ -1,5 +1,6 @@
 import styles from './UI.module.css'
 
+
 export function Btn({ children, variant = 'primary', onClick, disabled, full }) {
   return (
     <button
@@ -94,12 +95,17 @@ export function Spinner() {
   return <div className={styles.spinner} />
 }
 
-export function PageHeader({ back, onBack, title, subtitle }) {
+export function PageHeader({ back, onBack, title, subtitle, action }) {
   return (
     <div className={styles.pageHeader}>
       {back && <button className={styles.backBtn} onClick={onBack}>← {back}</button>}
-      <h1 className={styles.pageTitle}>{title}</h1>
-      {subtitle && <p className={styles.pageSubtitle}>{subtitle}</p>}
+      <div className={styles.pageHeaderRow}>
+        <div>
+          <h1 className={styles.pageTitle}>{title}</h1>
+          {subtitle && <p className={styles.pageSubtitle}>{subtitle}</p>}
+        </div>
+        {action && <div>{action}</div>}
+      </div>
     </div>
   )
 }

@@ -1,8 +1,9 @@
 const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
-const QUERY_COLABORADOR  = import.meta.env.VITE_REDASH_QUERY_COLABORADOR
-const QUERY_BUSCAR       = import.meta.env.VITE_REDASH_QUERY_BUSCAR
-const QUERY_SUBORDINADOS = import.meta.env.VITE_REDASH_QUERY_SUBORDINADOS
+const QUERY_COLABORADOR     = import.meta.env.VITE_REDASH_QUERY_COLABORADOR
+const QUERY_BUSCAR          = import.meta.env.VITE_REDASH_QUERY_BUSCAR
+const QUERY_SUBORDINADOS    = import.meta.env.VITE_REDASH_QUERY_SUBORDINADOS
+const QUERY_BUSCAR_PORTERIA = import.meta.env.VITE_REDASH_QUERY_BUSCAR_PORTERIA
 
 async function queryRedash(queryId, params = {}) {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/redash-proxy`, {
@@ -33,4 +34,8 @@ export async function buscarColaboradores(texto) {
 export async function getSubordinados(jefeId) {
   const rows = await queryRedash(QUERY_SUBORDINADOS, { jefe_id: parseInt(jefeId) })
   return rows.map(r => String(r.subordinado_id))
+}
+
+export async function buscarPorteria(texto) {
+  return await queryRedash(QUERY_BUSCAR_PORTERIA, { texto })
 }

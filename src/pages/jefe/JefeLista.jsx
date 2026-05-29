@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useUsuario } from '../../hooks/useUsuario'
 import { getSubordinados } from '../../lib/redash'
 import { supabase } from '../../lib/supabase'
-import { PageHeader, StatusBadge, Spinner, Banner } from '../../components/UI'
+import { PageHeader, StatusBadge, Spinner, Banner, Btn } from '../../components/UI'
 import styles from './Jefe.module.css'
 
 export function JefeLista() {
@@ -50,10 +50,11 @@ export function JefeLista() {
 
   return (
     <div className={styles.page}>
-      <PageHeader
-        title="Solicitudes de vehículo"
-        subtitle={`${pendientes.length} pendiente${pendientes.length !== 1 ? 's' : ''} de aprobación`}
-      />
+  <PageHeader
+  title="Solicitudes de vehículo"
+  subtitle={`${pendientes.length} pendiente${pendientes.length !== 1 ? 's' : ''} de aprobación`}
+  action={<Btn onClick={() => navigate('/mis-solicitudes')}>Mis solicitudes</Btn>}
+/>
       <div className={styles.content}>
         {loading && <Spinner />}
         {error   && <Banner type="error" icon="⚠️">{error}</Banner>}
