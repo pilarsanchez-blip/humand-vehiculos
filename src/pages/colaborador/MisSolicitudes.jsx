@@ -11,11 +11,9 @@ export function MisSolicitudes() {
   const navigate = useNavigate()
   const [tickets,  setTickets]  = useState([])
   const [loading,  setLoading]  = useState(true)
-  const [expanded, setExpanded] = useState(null) // id del ticket con QR expandido
+  const [expanded, setExpanded] = useState(null)
 
-  useEffect(() => {
-    cargar()
-  }, [usuario.userId])
+  useEffect(() => { cargar() }, [usuario.userId])
 
   async function cargar() {
     setLoading(true)
@@ -27,22 +25,22 @@ export function MisSolicitudes() {
       .limit(20)
     setTickets(data ?? [])
     setLoading(false)
-
-    // Si hay un ticket activo (aprobado o pendiente), expandir el QR automáticamente
     const activo = (data ?? []).find(t => ['PENDIENTE','APROBADO','EN_VIAJE'].includes(t.estado))
     if (activo) setExpanded(activo.id)
   }
 
-  const activos = tickets.filter(t => ['PENDIENTE','APROBADO','EN_VIAJE','COMPLETAR_DATOS'].includes(t.estado))
+  const activos  = tickets.filter(t => ['PENDIENTE','APROBADO','EN_VIAJE','COMPLETAR_DATOS'].includes(t.estado))
   const cerrados = tickets.filter(t => ['CERRADO','RECHAZADO'].includes(t.estado))
 
   return (
     <div className={styles.page}>
-      <PageHeader
-        title="Mis solicitudes"
-        subtitle={`${usuario.nombre}`}
-      />
+      <PageHeader title="Mis solicitudes" subtitle={usuario.nombre} />
       <div className={styles.content}>
+
+        <Btn variant="primary" full onClick={() => navigate(`/solicitud${window.location.search}`)}>
+          + Nueva solicitud
+        </Btn>
+
         {loading && <Spinner />}
 
         {!loading && activos.length === 0 && cerrados.length === 0 && (
@@ -78,18 +76,12 @@ export function MisSolicitudes() {
           </>
         )}
       </div>
-
-      <div className={styles.actions}>
-        <Btn variant="primary" full onClick={() => navigate(`/solicitud${window.location.search}`)}>
-          + Nueva solicitud
-        </Btn>
-      </div>
     </div>
   )
 }
 
 function TicketCard({ ticket, expanded, onToggle, onRetorno }) {
-  const showQR     = ['PENDIENTE','APROBADO','EN_VIAJE'].includes(ticket.estado)
+  const showQR      = ['PENDIENTE','APROBADO','EN_VIAJE'].includes(ticket.estado)
   const showRetorno = ticket.estado === 'COMPLETAR_DATOS'
 
   return (
