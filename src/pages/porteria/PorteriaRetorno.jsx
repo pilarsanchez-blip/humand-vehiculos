@@ -1,3 +1,4 @@
+```jsx
 import { useState } from 'react'
 import { useUsuario } from '../../hooks/useUsuario'
 import { buscarTicketsPorteria, confirmarLlegada } from '../../lib/tickets'
@@ -46,19 +47,19 @@ export function PorteriaRetorno() {
     setSaving(true)
     setError('')
     try {
-      await confirmarLlegada(ticket.id, usuario.userId, usuario.nombre)
+      const result = await confirmarLlegada(ticket.id, usuario.userId, usuario.nombre)
+      if (!result) throw new Error('No se recibió respuesta de Supabase')
 
-      // Notificación via Edge Function
       await supabase.functions.invoke('notificar-retorno', {
         body: {
           colaboradorId: ticket.colaborador_id,
           ticketId: ticket.id,
         },
-      })
+      }).catch(() => {})
 
       setConfirmado(true)
     } catch (e) {
-      setError('Error al confirmar. Intentá de nuevo.')
+      setError(`Error: ${e?.message ?? JSON.stringify(e)}`)
     } finally {
       setSaving(false)
     }
@@ -187,3 +188,4 @@ export function PorteriaRetorno() {
     </div>
   )
 }
+```
