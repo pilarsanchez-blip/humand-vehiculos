@@ -8,6 +8,9 @@ const CORS = {
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const BOT_TOKEN    = Deno.env.get('HUMAND_BOT_TOKEN')!
+console.log('BOT_TOKEN length:', BOT_TOKEN?.length)
+console.log('BOT_TOKEN last 10:', BOT_TOKEN?.slice(-10))
+console.log('BOT_TOKEN first 10:', BOT_TOKEN?.slice(0, 10))
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
