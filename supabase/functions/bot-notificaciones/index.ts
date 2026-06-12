@@ -99,7 +99,7 @@ serve(async (req) => {
       const salida = new Date(ticket.ts_solicitud).toLocaleString('es-AR', {
         day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
       })
-      const mensaje = `🚗 *Nueva solicitud de vehículo*\n\n*Colaborador:* ${ticket.colaborador_nombre}\n*Vehículo:* ${ticket.vehiculo_placa}\n*Salida:* ${salida}\n\nIngresá para aprobar o rechazar:\n${APP_URL}/jefe`
+      const mensaje = `🚗 *Nueva solicitud de vehículo*\n\n*Colaborador:* ${ticket.colaborador_nombre}\n*Vehículo:* ${ticket.vehiculo_placa}\n*Salida:* ${salida}\n\nIngresá para aprobar o rechazar:\n${APP_URL}`
       await mandarMensaje(channelId, mensaje)
     }
 
