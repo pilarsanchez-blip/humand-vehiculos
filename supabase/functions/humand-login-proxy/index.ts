@@ -12,7 +12,7 @@ serve(async (req) => {
   console.log('login intento:', employeeInternalId)
 
   // Paso 1 — login
-  const loginRes = await fetch(''https://api-prod.humand.co/api/v1/users/' + employeeInternalId {
+  const loginRes = await fetch('https://api-prod.humand.co/api/v1/users/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ employeeInternalId, instanceId: 7723, password }),
@@ -32,7 +32,7 @@ serve(async (req) => {
   console.log('token obtenido:', token ? 'si' : 'no')
 
   // Paso 2 — traer perfil con segmentaciones
-  const meRes = await fetch('https://api-prod.humand.co/api/v1/users/me', {
+  const meRes = await fetch('https://api-prod.humand.co/api/v1/users/' + employeeInternalId, {
     headers: {
       'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json',
@@ -40,9 +40,8 @@ serve(async (req) => {
   })
 
   const meData = await meRes.json()
-  console.log('meData:', JSON.stringify(meData))
+  console.log('meData segmentation:', JSON.stringify(meData.segmentation))
 
-  // Extraer seccionIds y nombre de sección
   const segmentacion = meData.segmentation ?? []
   const seccionIds = segmentacion.map((s) => s.id ?? s.itemId).filter(Boolean)
   const seccionNombres = segmentacion.map((s) => s.item ?? s.name).filter(Boolean)
