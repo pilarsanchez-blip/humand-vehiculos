@@ -30,9 +30,7 @@ serve(async (req) => {
       })
     }
     console.log('login usuario ok')
-    console.log('loginData keys:', Object.keys(loginData))
-    console.log('loginData.employeeInternalId:', loginData.employeeInternalId)
-    console.log('loginData.id:', loginData.id)
+    console.log('loginData.user:', JSON.stringify(loginData.user))
 
     // Paso 2 — login del bot para obtener Bearer token
     const botLoginRes = await fetch('https://api-prod.humand.co/api/v1/users/login', {
@@ -51,7 +49,9 @@ serve(async (req) => {
     console.log('login bot ok, token:', botLoginData.token?.slice(0, 20))
 
     // Paso 3 — traer segmentaciones con Bearer del bot
-    const userRes = await fetch('https://api-prod.humand.co/api/v1/users/' + loginData.employeeInternalId, {
+    const userId = loginData.user?.employeeInternalId
+    console.log('userId:', userId)
+    const userRes = await fetch('https://api-prod.humand.co/api/v1/users/' + userId, {
       headers: {
         'Authorization': 'Bearer ' + botLoginData.token,
       },
