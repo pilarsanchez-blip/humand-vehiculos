@@ -57,17 +57,31 @@ serve(async (req) => {
     const tickets = await ticketRes.json()
     const ticket = tickets[0]
     if (!ticket) throw new Error('Ticket no encontrado: ' + ticketId)
-    console.log('ticket:', JSON.stringify(ticket))
+    console.log('jefe_id:', ticket.jefe_id)
 
     if (evento === 'SOLICITUD_ENVIADA') {
-      const jefeId = ticket.jefe_id
-      if (!jefeId) {
-        console.log('sin jefe_id, skip notificacion')
+      if (!ticket.jefe_id) {
+        console.log('sin jefe_id, skip')
         return new Response(JSON.stringify({ ok: true, skipped: true }), { status: 200 })
       }
-      const channelId = await abrirCanal(Number(jefeId))
+
+      // Resolver numeric ID del jefe
+      const jefeRes = await fetch(
+        'https://api-prod.humand.co/public/api/v1/users/' + encodeURIComponent(ticket.jefe_id),
+        { headers: { 'Authorization': 'Basic ' + BOT_BASIC } }
+      )
+      const jefeData = await jefeRes.json()
+      const jefeNumericId = jefeData.id
+      console.log('jefeNumericId:', jefeNumericId)
+      if (!jefeNumericId) throw new Error('No se pudo resolver numeric ID del jefe')
+
+      const channelId = await abrirCanal(jefeNumericId)
       if (!channelId) throw new Error('No se pudo abrir canal con jefe')
-      const mensaje = `🚗 *Nueva solicitud de vehículo*\n\n*Colaborador:* ${ticket.colaborador_nombre}\n*Vehículo:* ${ticket.vehiculo_placa}\n*Salida:* ${new Date(ticket.ts_solicitud).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}\n\nIngresá para aprobar o rechazar: ${APP_URL}/jefe`
+
+      const salida = new Date(ticket.ts_solicitud).toLocaleString('es-AR', {
+        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+      })
+      const mensaje = `🚗 *Nueva solicitud de vehículo*\n\n*Colaborador:* ${ticket.colaborador_nombre}\n*Vehículo:* ${ticket.vehiculo_placa}\n*Salida:* ${salida}\n\nIngresá para aprobar o rechazar:\n${APP_URL}/jefe`
       await mandarMensaje(channelId, mensaje)
     }
 
