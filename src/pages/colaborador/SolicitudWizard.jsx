@@ -50,6 +50,7 @@ export function SolicitudWizard() {
         acompanantes,
         km_inicial:            parseInt(kmInicial),
         ts_solicitud:          new Date(fechaSalida + 'T' + horaSalida).toISOString(),
+        jefe_id:               usuario.jefeInternalId ?? null,
       })
       notificarBot('SOLICITUD_ENVIADA', ticket.id)
       navigate('/solicitud/enviada?id=' + ticket.id)
@@ -91,7 +92,6 @@ export function SolicitudWizard() {
         {error && <Banner type="error" icon="⚠️">{error}</Banner>}
         {loading && <Spinner />}
 
-        {/* ── PASO 0: MIS DATOS ── */}
         {paso === 0 && !loading && (
           <>
             <p className={styles.secTitle}>Información del solicitante</p>
@@ -110,22 +110,16 @@ export function SolicitudWizard() {
                 value={horaSalida}
                 onChange={e => setHoraSalida(e.target.value)}
                 style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1.5px solid var(--border)',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontFamily: 'inherit',
-                  color: 'var(--text)',
-                  background: 'white',
-                  boxSizing: 'border-box',
+                  width: '100%', padding: '10px 12px',
+                  border: '1.5px solid var(--border)', borderRadius: 8,
+                  fontSize: 14, fontFamily: 'inherit',
+                  color: 'var(--text)', background: 'white', boxSizing: 'border-box',
                 }}
               />
             </Field>
           </>
         )}
 
-        {/* ── PASO 1: VEHÍCULO ── */}
         {paso === 1 && !loading && (
           <>
             <p className={styles.secTitle}>{vehiculos.length} vehículos disponibles</p>
@@ -161,12 +155,10 @@ export function SolicitudWizard() {
           </>
         )}
 
-        {/* ── PASO 2: ACOMPAÑANTES ── */}
         {paso === 2 && !loading && (
           <AcompanantesStep acompanantes={acompanantes} setAcompanantes={setAcompanantes} />
         )}
 
-        {/* ── PASO 3: CONFIRMAR ── */}
         {paso === 3 && !loading && (
           <>
             <p className={styles.secTitle}>Revisá los datos antes de enviar</p>
@@ -185,7 +177,6 @@ export function SolicitudWizard() {
         )}
       </div>
 
-      {/* ── ACCIONES ── */}
       {!loading && (
         <div className={styles.actions}>
           {paso > 0 && (
@@ -262,7 +253,7 @@ function AcompananteCard({ index, data, onUpdate, onQuitar }) {
 
   async function buscar(texto) {
     onUpdate('nombre', texto)
-    onUpdate('codigo', '')          // resetear codigo al tipear
+    onUpdate('codigo', '')
     if (data.tipo === 'externo' || texto.length < 3) { setResultados([]); return }
     setBuscando(true)
     try {
