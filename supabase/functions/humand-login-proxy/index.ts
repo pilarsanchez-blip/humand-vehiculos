@@ -32,7 +32,7 @@ serve(async (req) => {
     }
     console.log('login usuario ok')
 
-    // Paso 2 — traer segmentaciones con Basic del bot (public API)
+    // Paso 2 — traer segmentaciones + jefe con Basic del bot (public API)
     const userInternalId = loginData.user?.employeeInternalId
     console.log('userInternalId:', userInternalId)
     const userRes = await fetch(
@@ -45,20 +45,21 @@ serve(async (req) => {
     console.log('userRes status:', userRes.status)
 
     const segmentaciones = userData.segmentations ?? []
-    console.log('segmentaciones:', JSON.stringify(segmentaciones))
-
-    // Tomar items de los 3 grupos relevantes
     const GRUPOS = ['DEPARTAMENTOS', 'SECCIONES', 'GERENCIAS']
     const seccionNombres = segmentaciones
       .filter((s: any) => GRUPOS.includes(s.group))
       .map((s: any) => s.item)
       .filter(Boolean)
-    console.log('seccionNombres:', JSON.stringify(seccionNombres))
 
-    // seccion = item del grupo SECCIONES (para mostrar en UI)
-    const seccion = segmentaciones.find((s: any) => s.group === 'SECCIONES')?.item ?? ''
+    const seccion = segmentaciones.find((s: any) => s.group === 'SECCIONES')?.item
+      ?? segmentaciones.find((s: any) => s.group === 'DEPARTAMENTOS')?.item
+      ?? segmentaciones.find((s: any) => s.group === 'GERENCIAS')?.item
+      ?? ''
 
-    // Paso 3 — buscar seccionIds en Supabase para todos los items
+    const jefeInternalId = userData.relationships?.find((r: any) => r.name === 'BOSS')?.employeeInternalId ?? null
+    console.log('jefeInternalId:', jefeInternalId)
+
+    // Paso 3 — buscar seccionIds en Supabase
     const nombres = seccionNombres.map((n: string) => '"' + n + '"').join(',')
     const mapRes = await fetch(
       SUPABASE_URL + '/rest/v1/vehiculo_segmentacion_map?select=segmentation_item_id,seccion_spreadsheet&seccion_spreadsheet=in.(' + encodeURIComponent(nombres) + ')',
@@ -73,7 +74,7 @@ serve(async (req) => {
     console.log('mapData:', JSON.stringify(mapData))
     const seccionIds = Array.isArray(mapData) ? mapData.map((r: any) => r.segmentation_item_id) : []
 
-    return new Response(JSON.stringify({ ...loginData, seccionIds, seccion }), {
+    return new Response(JSON.stringify({ ...loginData, seccionIds, seccion, jefeInternalId }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     })
