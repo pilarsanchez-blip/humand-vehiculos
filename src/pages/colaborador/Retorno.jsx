@@ -8,13 +8,13 @@ import styles from './Retorno.module.css'
 export function Retorno() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [ticket, setTicket]     = useState(null)
-  const [loading, setLoading]   = useState(true)
-  const [saving, setSaving]     = useState(false)
-  const [error, setError]       = useState('')
-  const [cerrado, setCerrado]   = useState(false)
-  const [kmFinal, setKmFinal]   = useState('')
-  const [obs, setObs]           = useState('')
+  const [ticket, setTicket]   = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving]   = useState(false)
+  const [error, setError]     = useState('')
+  const [cerrado, setCerrado] = useState(false)
+  const [kmFinal, setKmFinal] = useState('')
+  const [obs, setObs]         = useState('')
 
   useEffect(() => {
     getTicket(id)
@@ -30,14 +30,9 @@ export function Retorno() {
     setError('')
     try {
       const t = await cerrarTicket(id, parseInt(kmFinal), obs)
-      await fetch('/api/bot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ evento: 'RETORNO_COMPLETADO', ticketId: id }),
-      }).catch(() => {})
       setTicket(t)
       setCerrado(true)
-    } catch (e) {
+    } catch {
       setError('Error al guardar. Intentá de nuevo.')
     } finally {
       setSaving(false)
@@ -47,11 +42,26 @@ export function Retorno() {
   if (loading) return <div style={{ padding: 32 }}><Spinner /></div>
   if (error && !ticket) return <div style={{ padding: 20 }}><Banner type="error" icon="⚠️">{error}</Banner></div>
 
+  if (ticket && ticket.estado !== 'COMPLETAR_DATOS' && !cerrado) {
+    return (
+      <div style={{ padding: 20 }}>
+        <Banner type="warn" icon="⚠️">
+          {ticket.estado === 'CERRADO'
+            ? 'Este ticket ya fue cerrado.'
+            : 'Este ticket no está listo para completar datos de retorno.'}
+        </Banner>
+        <div style={{ marginTop: 12 }}>
+          <Btn variant="secondary" onClick={() => navigate('/mis-solicitudes')} full>← Volver</Btn>
+        </div>
+      </div>
+    )
+  }
+
   const eventos = [
-    { label: 'Solicitud enviada',          timestamp: ticket.ts_solicitud,  done: true },
-    { label: 'Aprobado por jefe',          timestamp: ticket.ts_aprobacion, done: !!ticket.ts_aprobacion },
-    { label: 'Salida confirmada',          timestamp: ticket.ts_salida,     done: !!ticket.ts_salida },
-    { label: 'Llegada confirmada por portería', timestamp: ticket.ts_llegada, done: !!ticket.ts_llegada },
+    { label: 'Solicitud enviada',               timestamp: ticket.ts_solicitud,  done: true },
+    { label: 'Aprobado por jefe',               timestamp: ticket.ts_aprobacion, done: !!ticket.ts_aprobacion },
+    { label: 'Salida confirmada',               timestamp: ticket.ts_salida,     done: !!ticket.ts_salida },
+    { label: 'Llegada confirmada por portería', timestamp: ticket.ts_llegada,    done: !!ticket.ts_llegada },
     { label: cerrado ? 'Retorno completado' : 'Completando datos...', timestamp: ticket.ts_retorno, done: cerrado, active: !cerrado },
   ]
 
@@ -75,6 +85,9 @@ export function Retorno() {
               <SummaryRow label="KM recorridos" value={`${kmRec} km`} highlight />
               {ticket.observaciones && <SummaryRow label="Observaciones" value={ticket.observaciones} />}
             </SummaryCard>
+            <Btn variant="primary" onClick={() => navigate('/mis-solicitudes')} full>
+              ← Volver a mis solicitudes
+            </Btn>
           </>
         ) : (
           <>
@@ -84,7 +97,10 @@ export function Retorno() {
             <p className={styles.secTitle}>Datos de retorno</p>
             {error && <Banner type="error" icon="⚠️">{error}</Banner>}
 
-            <Field label="Kilometraje de retorno" hint={kmFinal && parseInt(kmFinal) > ticket.km_inicial ? `KM recorridos: ${parseInt(kmFinal) - ticket.km_inicial} km` : ''}>
+            <Field
+              label="Kilometraje de retorno"
+              hint={kmFinal && parseInt(kmFinal) > ticket.km_inicial ? `KM recorridos: ${parseInt(kmFinal) - ticket.km_inicial} km` : ''}
+            >
               <Input
                 type="number"
                 value={kmFinal}
@@ -109,17 +125,13 @@ export function Retorno() {
                 rows={3}
               />
             </Field>
+
+            <Btn variant="primary" onClick={cerrar} disabled={saving} full>
+              {saving ? 'Guardando...' : 'Cerrar solicitud →'}
+            </Btn>
           </>
         )}
       </div>
-
-      {!cerrado && (
-        <div className={styles.actions}>
-          <Btn variant="primary" onClick={cerrar} disabled={saving} full>
-            {saving ? 'Guardando...' : 'Cerrar solicitud →'}
-          </Btn>
-        </div>
-      )}
     </div>
   )
 }
