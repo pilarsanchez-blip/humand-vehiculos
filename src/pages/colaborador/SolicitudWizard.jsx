@@ -64,7 +64,11 @@ export function SolicitudWizard() {
   function notificarBot(evento, ticketId) {
     fetch('https://uasntnkbhtqkljfqfksv.supabase.co/functions/v1/bot-notificaciones', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        'apikey':        import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
       body: JSON.stringify({ evento, ticketId }),
     }).catch(() => {})
   }
