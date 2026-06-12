@@ -65,17 +65,17 @@ export function PorteriaSalida() {
   return (
     <div className={styles.page}>
       <PageHeader title="Portería — Salida" subtitle="Verificá el formulario antes de habilitar" />
-  
+
       <div className={styles.content}>
-  
-        {/* BÚSQUEDA — siempre montado, oculto cuando hay ticket o confirmado */}
+
+        {/* BÚSQUEDA */}
         <div style={{ display: ticket || confirmado ? 'none' : 'block' }}>
           {mostrarScanner ? (
             <QrScanner
-            onResult={(texto) => {
-              buscar(texto)
-              setMostrarScanner(false)
-            }}
+              onResult={(texto) => {
+                buscar(texto)
+                setMostrarScanner(false)
+              }}
               onError={(err) => {
                 setMostrarScanner(false)
                 setError(`Error cámara: ${err?.message ?? err}`)
@@ -92,9 +92,9 @@ export function PorteriaSalida() {
               <p className={styles.scanSub}>O ingresá el código manualmente</p>
             </div>
           )}
-  
+
           <div className={styles.orDiv}>o</div>
-  
+
           <Field label="Código de ticket">
             <div className={styles.searchRow}>
               <Input
@@ -106,10 +106,10 @@ export function PorteriaSalida() {
               <Btn variant="primary" onClick={() => buscar()}>Buscar</Btn>
             </div>
           </Field>
-  
+
           {loading && <Spinner />}
           {error   && <Banner type="error" icon="⚠️">{error}</Banner>}
-  
+
           {resultados.length > 1 && (
             <>
               <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-lighter)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 10 }}>
@@ -132,7 +132,7 @@ export function PorteriaSalida() {
             </>
           )}
         </div>
-  
+
         {/* DETALLE DEL TICKET */}
         {ticket && !confirmado && (
           <>
@@ -158,12 +158,17 @@ export function PorteriaSalida() {
                  'Este ticket ya fue procesado.'}
               </Banner>
             )}
+            {ticket.estado === 'APROBADO' && (
+              <Btn variant="success" onClick={confirmar} disabled={saving} full>
+                {saving ? 'Confirmando...' : '✓ Confirmar salida'}
+              </Btn>
+            )}
             <div style={{ marginTop: 8 }}>
               <Btn variant="secondary" onClick={() => setTicket(null)} full>← Volver a buscar</Btn>
             </div>
           </>
         )}
-  
+
         {/* CONFIRMADO */}
         {confirmado && (
           <>
@@ -174,20 +179,9 @@ export function PorteriaSalida() {
               <SummaryRow label="Vehículo"    value={ticket.vehiculo_placa} />
               <SummaryRow label="Hora salida" value={new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} />
             </SummaryCard>
+            <Btn variant="primary" onClick={reset} full>← Nuevo escaneo</Btn>
           </>
         )}
-      </div>
-  
-      <div className={styles.actions}>
-        {ticket && !confirmado && ticket.estado === 'APROBADO' && (
-          <Btn variant="success" onClick={confirmar} disabled={saving} full>
-            {saving ? 'Confirmando...' : '✓ Confirmar salida'}
-          </Btn>
-        )}
-        {confirmado && (
-          <Btn variant="primary" onClick={reset} full>← Nuevo escaneo</Btn>
-        )}
-        {!ticket && !confirmado && resultados.length === 0 && <div style={{ height: 44 }} />}
       </div>
     </div>
   )
