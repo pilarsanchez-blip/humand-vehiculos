@@ -113,6 +113,7 @@ export async function confirmarLlegada(id, porteroId, porteroNombre) {
   const { data, error } = await supabase
     .from('tickets')
     .update({
+      estado: 'COMPLETAR_DATOS',
       ts_llegada: new Date().toISOString(),
       portero_retorno_id: porteroId,
       portero_retorno_nombre: porteroNombre,
