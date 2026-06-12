@@ -8,34 +8,42 @@ function ulid() {
 }
 
 serve(async (req) => {
-  const { colaboradorHumandId, ticketId } = await req.json()
+  try {
+    const { colaboradorId, ticketId } = await req.json()
 
-  // Paso 1 — abrir canal
-  const ch = await fetch(`${BASE}/conversations.open`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${BOT_TOKEN}`,
-      'Idempotency-Key': ulid(),
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ users: [colaboradorHumandId] }),
-  }).then(r => r.json())
+    if (!colaboradorId) {
+      return new Response(JSON.stringify({ error: 'colaboradorId requerido' }), { status: 400 })
+    }
 
-  if (!ch.ok) return new Response(JSON.stringify({ error: ch }), { status: 500 })
+    const ch = await fetch(`${BASE}/conversations.open`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${BOT_TOKEN}`,
+        'Idempotency-Key': ulid(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ users: [colaboradorId] }),
+    }).then(r => r.json())
 
-  // Paso 2 — mandar mensaje
-  const msg = await fetch(`${BASE}/chat.postMessage`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${BOT_TOKEN}`,
-      'Idempotency-Key': ulid(),
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      channel: ch.channel.id,
-      text: `🚗 Tu vehículo llegó a portería. Ingresá a la app para completar los datos de retorno del ticket *${ticketId}*.`,
-    }),
-  }).then(r => r.json())
+    if (!ch.ok) {
+      return new Response(JSON.stringify({ error: 'conversations.open fallo', detail: ch }), { status: 500 })
+    }
 
-  return new Response(JSON.stringify(msg), { status: 200 })
+    const msg = await fetch(`${BASE}/chat.postMessage`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${BOT_TOKEN}`,
+        'Idempotency-Key': ulid(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        channel: ch.channel.id,
+        text: 'Tu vehiculo llego a porteria. Ingresa a la app para completar los datos de retorno del ticket ' + ticketId + '.',
+      }),
+    }).then(r => r.json())
+
+    return new Response(JSON.stringify(msg), { status: 200 })
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), { status: 500 })
+  }
 })
