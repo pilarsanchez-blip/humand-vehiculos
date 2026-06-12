@@ -41,7 +41,7 @@ serve(async (req) => {
     console.log('userRes status:', userRes.status)
     console.log('userData:', JSON.stringify(userData).slice(0, 500))
 
-    const segmentaciones = userData.segmentations ?? []
+    const segmentaciones = userData.segmentation ?? []
     console.log('segmentaciones:', JSON.stringify(segmentaciones))
     const seccionNombres = segmentaciones.map((s: any) => s.item).filter(Boolean)
     const seccion = seccionNombres[0] ?? ''
