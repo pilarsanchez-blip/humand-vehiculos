@@ -63,8 +63,13 @@ export function JefeDetalle() {
       <div className={styles.content}>
         {error && <Banner type="error" icon="⚠️">{error}</Banner>}
         {!isPendiente && (
-          <Banner type={ticket.estado === 'APROBADO' ? 'ok' : 'error'} icon={ticket.estado === 'APROBADO' ? '✅' : '❌'}>
-            {ticket.estado === 'APROBADO' ? 'Solicitud aprobada' : `Solicitud rechazada${ticket.jefe_comentario ? ': ' + ticket.jefe_comentario : ''}`}
+          <Banner
+          type={ticket.estado === 'RECHAZADO' ? 'error' : 'ok'}
+            icon={ticket.estado === 'RECHAZADO' ? '❌' : '✅'}
+              >
+        {ticket.estado === 'RECHAZADO'
+          ? 'Solicitud rechazada' + (ticket.jefe_comentario ? ': ' + ticket.jefe_comentario : '')
+          : 'Solicitud aprobada'}
           </Banner>
         )}
 
