@@ -26,6 +26,8 @@ serve(async (req) => {
       { headers: { 'Authorization': 'Basic ' + BOT_BASIC } }
     )
     const userData = await userRes.json()
+    console.log('userRes status:', userRes.status)
+console.log('userData:', JSON.stringify(userData).slice(0, 500))
 
     const segmentaciones = userData.segmentations ?? []
     const GRUPOS = ['DEPARTAMENTOS', 'SECCIONES', 'GERENCIAS']
