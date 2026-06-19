@@ -16,9 +16,9 @@ export async function login(employeeInternalId, password) {
   return res.json()
 }
 
-export async function refreshSession(): Promise<void> {
+export async function refreshSession() {
   const session = getSession()
-  if (!session?.user?.employeeInternalId) return
+  if (!session?.userId) return
 
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/humand-refresh-session`, {
@@ -28,11 +28,10 @@ export async function refreshSession(): Promise<void> {
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         'apikey':        SUPABASE_ANON_KEY,
       },
-      body: JSON.stringify({ userInternalId: session.user.employeeInternalId }),
+      body: JSON.stringify({ userInternalId: session.userId }),
     })
     if (!res.ok) return
     const data = await res.json()
-    // Merge sin pisar token, rol ni datos de usuario
     saveSession({ ...session, ...data })
   } catch {
     // silencioso — sesión existente sigue siendo válida
