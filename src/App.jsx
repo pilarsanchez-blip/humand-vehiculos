@@ -1,6 +1,7 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import './styles/globals.css'
-import { getSession } from './lib/humandAuth'
+import { getSession, refreshSession } from './lib/humandAuth'
 import Login from './pages/Login'
 // Colaborador
 import { MisSolicitudes }  from './pages/colaborador/MisSolicitudes'
@@ -20,11 +21,9 @@ function AdminButton() {
   const session  = getSession()
   const location = useLocation()
   const navigate = useNavigate()
-
   if (!session || !session.esAdmin) return null
   if (location.pathname === '/login') return null
   if (location.pathname.startsWith('/admin')) return null
-
   return (
     <button
       onClick={() => navigate('/admin')}
@@ -51,23 +50,27 @@ function RootRedirect() {
   const session = getSession()
   if (!session) return <Navigate to="/login" replace />
   const { rol } = session
-  if (rol === 'jefe')            return <Navigate to="/jefe" replace />
+  if (rol === 'jefe')    return <Navigate to="/jefe" replace />
   if (rol === 'porteria') return <Navigate to="/porteria/salida" replace />
-
   return <Navigate to="/mis-solicitudes" replace />
 }
 
 export default function App() {
+  useEffect(() => {
+    // Refresca jefeInternalId, seccionIds y seccion en background al entrar a la app
+    refreshSession()
+  }, [])
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<RootRedirect />} />
         {/* Colaborador */}
-        <Route path="/mis-solicitudes" element={<Guard><MisSolicitudes /></Guard>} />
-        <Route path="/solicitud"       element={<Guard><SolicitudWizard /></Guard>} />
+        <Route path="/mis-solicitudes"   element={<Guard><MisSolicitudes /></Guard>} />
+        <Route path="/solicitud"         element={<Guard><SolicitudWizard /></Guard>} />
         <Route path="/solicitud/enviada" element={<Guard><SolicitudEnviada /></Guard>} />
-        <Route path="/retorno/:id"     element={<Guard><Retorno /></Guard>} />
+        <Route path="/retorno/:id"       element={<Guard><Retorno /></Guard>} />
         {/* Jefe */}
         <Route path="/jefe"    element={<Guard><JefeLista /></Guard>} />
         <Route path="/jefe/:id" element={<Guard><JefeDetalle /></Guard>} />
