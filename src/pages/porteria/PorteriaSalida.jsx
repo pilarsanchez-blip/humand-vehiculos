@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useUsuario } from '../../hooks/useUsuario'
 import { buscarTicketsPorteria, confirmarSalida, confirmarLlegada } from '../../lib/tickets'
 import { PageHeader, Btn, Field, Input, SummaryCard, SummaryRow, StatusBadge, Banner, Spinner } from '../../components/UI'
@@ -7,16 +8,28 @@ import { supabase } from '../../lib/supabase'
 import styles from './Porteria.module.css'
 
 export function PorteriaSalida() {
-  const usuario = useUsuario()
+  const usuario  = useUsuario()
+  const navigate = useNavigate()
   const [tab, setTab] = useState('salida') // 'salida' | 'retorno'
-
-  function resetAll() {
-    setTab(tab) // fuerza re-render limpio al cambiar tab
-  }
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Portería" subtitle="Gestion de salidas y retornos" />
+      <PageHeader title="Portería" subtitle="Gestión de salidas y retornos" />
+
+      {/* Acceso rápido al panel monitor */}
+      <div style={{ padding: '0 20px 4px', textAlign: 'right' }}>
+        <button
+          onClick={() => navigate('/porteria/panel')}
+          style={{
+            background: '#1e3a8a', color: '#fff',
+            border: 'none', borderRadius: 8,
+            padding: '7px 14px', fontSize: 12, fontWeight: 600,
+            cursor: 'pointer', letterSpacing: '0.2px',
+          }}
+        >
+          🖥 Ver panel
+        </button>
+      </div>
 
       {/* TABS */}
       <div style={{ display: 'flex', borderBottom: '2px solid var(--border)', marginBottom: 16 }}>

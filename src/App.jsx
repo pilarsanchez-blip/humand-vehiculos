@@ -11,6 +11,7 @@ import { JefeLista }   from './pages/jefe/JefeLista'
 import { JefeDetalle } from './pages/jefe/JefeDetalle'
 import { PorteriaSalida }  from './pages/porteria/PorteriaSalida'
 import { PorteriaRetorno } from './pages/porteria/PorteriaRetorno'
+import { PorteriaPanel }   from './pages/porteria/PorteriaPanel'
 import { Admin } from './pages/admin/Admin'
 
 function FloatingButtons() {
@@ -92,6 +93,7 @@ export default function App() {
         <Route path="/jefe/:id"          element={<Guard><JefeDetalle /></Guard>} />
         <Route path="/porteria/salida"   element={<Guard><PorteriaSalida /></Guard>} />
         <Route path="/porteria/retorno"  element={<Guard><PorteriaRetorno /></Guard>} />
+        <Route path="/porteria/panel"    element={<Guard><PorteriaPanel /></Guard>} />
         <Route path="/admin"             element={<Guard><Admin /></Guard>} />
       </Routes>
       <FloatingButtons />

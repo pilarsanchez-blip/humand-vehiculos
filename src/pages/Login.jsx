@@ -19,7 +19,26 @@ export default function Login() {
     setError(null)
     setLoading(true)
     try {
-      const data   = await login(employeeId, password)
+      const data = await login(employeeId, password)
+
+      // ─── Usuario genérico de Portería ──────────────────────────────────────
+      if (data._porteria) {
+        saveSession({
+          userId:             'porteria',
+          employeeInternalId: 'PORTERIA',
+          nombre:             'Portería',
+          rol:                'porteria',
+          esAdmin:            false,
+          token:              '',
+          seccionIds:         [],
+          seccion:            '',
+          jefeInternalId:     null,
+        })
+        window.location.href = '/'
+        return
+      }
+      // ───────────────────────────────────────────────────────────────────────
+
       const userId = data.user.id
 
       const { data: porteria } = await supabase

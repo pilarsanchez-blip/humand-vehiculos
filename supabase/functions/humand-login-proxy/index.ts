@@ -17,6 +17,29 @@ serve(async (req) => {
     const { employeeInternalId, password } = await req.json()
     console.log('login intento:', employeeInternalId)
 
+    // ─── Usuario genérico de Portería ───────────────────────────────────────
+    if (employeeInternalId?.toUpperCase() === 'PORTERIA') {
+      const pin = Deno.env.get('PORTERIA_PIN') ?? ''
+      if (!pin || password !== pin) {
+        return new Response(JSON.stringify({ error: 'PIN incorrecto' }), {
+          status: 401,
+          headers: { ...CORS, 'Content-Type': 'application/json' },
+        })
+      }
+      return new Response(JSON.stringify({
+        _porteria: true,
+        user: { id: 'porteria', firstName: 'Portería', lastName: '', permissions: {} },
+        accessToken: '',
+        seccionIds: [],
+        seccion: '',
+        jefeInternalId: null,
+      }), {
+        status: 200,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      })
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     // Paso 1 — login del usuario
     const loginRes = await fetch('https://api-prod.humand.co/api/v1/users/login', {
       method: 'POST',
