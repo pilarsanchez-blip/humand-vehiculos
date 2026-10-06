@@ -144,7 +144,7 @@ export async function cerrarTicket(id, kmFinal, observaciones) {
 export async function getTicketsActivos() {
   const { data, error } = await supabase
     .from('tickets')
-    .select('id, estado, colaborador_nombre, vehiculo_placa, vehiculo_clase, ts_solicitud, ts_salida, destino, jefe_nombre')
+    .select('*')
     .not('estado', 'in', '(CERRADO,RECHAZADO)')
     .order('ts_solicitud', { ascending: false })
   if (error) throw error
