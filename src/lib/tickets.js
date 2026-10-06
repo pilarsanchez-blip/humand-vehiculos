@@ -145,7 +145,7 @@ export async function getTicketsActivos() {
   const { data, error } = await supabase
     .from('tickets')
     .select('*')
-    .not('estado', 'in', '(CERRADO,RECHAZADO)')
+    .not('estado', 'eq', 'RECHAZADO')
     .order('ts_solicitud', { ascending: false })
   if (error) throw error
   return data ?? []

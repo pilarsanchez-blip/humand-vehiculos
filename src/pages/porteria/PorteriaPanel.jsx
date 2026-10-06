@@ -2,13 +2,14 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getTicketsActivos } from '../../lib/tickets'
 
-const REFRESH_INTERVAL = 12 // segundos
+const REFRESH_INTERVAL = 12
 
 const ESTADOS = [
-  { key: 'PENDIENTE',       label: 'Pendientes',      icon: '⏳', color: '#f59e0b', bg: '#fffbeb', border: '#fcd34d' },
-  { key: 'APROBADO',        label: 'Aprobados',        icon: '✅', color: '#16a34a', bg: '#f0fdf4', border: '#86efac' },
-  { key: 'EN_VIAJE',        label: 'En viaje',         icon: '🚗', color: '#2563eb', bg: '#eff6ff', border: '#93c5fd' },
-  { key: 'COMPLETAR_DATOS', label: 'Completar datos',  icon: '📋', color: '#7c3aed', bg: '#f5f3ff', border: '#c4b5fd' },
+  { key: 'PENDIENTE',       label: 'Pendientes',     icon: '⏳', color: '#f59e0b', bg: '#fffbeb', border: '#fcd34d' },
+  { key: 'APROBADO',        label: 'Aprobados',      icon: '✅', color: '#16a34a', bg: '#f0fdf4', border: '#86efac' },
+  { key: 'EN_VIAJE',        label: 'En viaje',       icon: '🚗', color: '#2563eb', bg: '#eff6ff', border: '#93c5fd' },
+  { key: 'COMPLETAR_DATOS', label: 'Completar datos',icon: '📋', color: '#7c3aed', bg: '#f5f3ff', border: '#c4b5fd' },
+  { key: 'CERRADO',         label: 'Cerrados',       icon: '🏁', color: '#6b7280', bg: '#f9fafb', border: '#d1d5db' },
 ]
 
 function fmt(iso) {
@@ -19,6 +20,16 @@ function fmt(iso) {
 function fmtFecha(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })
+}
+
+function matchBusqueda(ticket, q) {
+  if (!q) return true
+  const texto = q.toLowerCase()
+  return (
+    ticket.id?.toLowerCase().includes(texto) ||
+    ticket.colaborador_nombre?.toLowerCase().includes(texto) ||
+    ticket.vehiculo_placa?.toLowerCase().includes(texto)
+  )
 }
 
 function TicketCard({ ticket }) {
@@ -67,7 +78,6 @@ function TicketCard({ ticket }) {
 function Columna({ estado, tickets }) {
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
-      {/* Header de columna */}
       <div style={{
         background: estado.bg,
         border: `1.5px solid ${estado.border}`,
@@ -99,7 +109,6 @@ function Columna({ estado, tickets }) {
         </span>
       </div>
 
-      {/* Cards */}
       {tickets.length === 0 ? (
         <div style={{ textAlign: 'center', color: '#d1d5db', fontSize: 12, padding: '24px 0' }}>
           Sin tickets
@@ -118,6 +127,7 @@ export function PorteriaPanel() {
   const [error,     setError]     = useState('')
   const [countdown, setCountdown] = useState(REFRESH_INTERVAL)
   const [hora,      setHora]      = useState(new Date())
+  const [busqueda,  setBusqueda]  = useState('')
 
   const cargar = useCallback(async () => {
     try {
@@ -132,14 +142,12 @@ export function PorteriaPanel() {
     }
   }, [])
 
-  // Carga inicial y polling
   useEffect(() => {
     cargar()
     const interval = setInterval(cargar, REFRESH_INTERVAL * 1000)
     return () => clearInterval(interval)
   }, [cargar])
 
-  // Countdown visual
   useEffect(() => {
     const tick = setInterval(() => {
       setCountdown(c => (c <= 1 ? REFRESH_INTERVAL : c - 1))
@@ -148,7 +156,9 @@ export function PorteriaPanel() {
     return () => clearInterval(tick)
   }, [])
 
-  const byEstado = (key) => tickets.filter(t => t.estado === key)
+  const filtrados = tickets.filter(t => matchBusqueda(t, busqueda))
+  const byEstado  = (key) => filtrados.filter(t => t.estado === key)
+  const activos   = tickets.filter(t => t.estado !== 'CERRADO').length
 
   return (
     <div style={{
@@ -173,7 +183,7 @@ export function PorteriaPanel() {
             Panel de Portería
           </div>
           <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>
-            Vista en tiempo real · {tickets.length} ticket{tickets.length !== 1 ? 's' : ''} activo{tickets.length !== 1 ? 's' : ''}
+            Vista en tiempo real · {activos} ticket{activos !== 1 ? 's' : ''} activo{activos !== 1 ? 's' : ''}
           </div>
         </div>
 
@@ -204,7 +214,7 @@ export function PorteriaPanel() {
         </button>
       </div>
 
-      {/* Barra de progreso del refresh */}
+      {/* Barra de progreso */}
       <div style={{ height: 3, background: '#dbeafe' }}>
         <div style={{
           height: '100%',
@@ -214,9 +224,44 @@ export function PorteriaPanel() {
         }} />
       </div>
 
-      {/* Error */}
+      {/* Buscador */}
+      <div style={{ padding: '14px 20px 0', display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ position: 'relative', flex: 1, maxWidth: 420 }}>
+          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 15, color: '#9ca3af' }}>🔍</span>
+          <input
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+            placeholder="Buscar por nombre, apellido o número de ticket…"
+            style={{
+              width: '100%',
+              padding: '9px 12px 9px 36px',
+              border: '1.5px solid #e5e7eb',
+              borderRadius: 8,
+              fontSize: 13,
+              fontFamily: 'Roboto, sans-serif',
+              outline: 'none',
+              background: '#fff',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+        {busqueda && (
+          <button
+            onClick={() => setBusqueda('')}
+            style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: 13 }}
+          >
+            ✕ Limpiar
+          </button>
+        )}
+        {busqueda && (
+          <span style={{ fontSize: 12, color: '#6b7280' }}>
+            {filtrados.length} resultado{filtrados.length !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+
       {error && (
-        <div style={{ background: '#fef2f2', borderBottom: '1px solid #fca5a5', padding: '10px 24px', color: '#dc2626', fontSize: 13 }}>
+        <div style={{ background: '#fef2f2', borderBottom: '1px solid #fca5a5', padding: '10px 24px', color: '#dc2626', fontSize: 13, marginTop: 10 }}>
           ⚠️ {error}
         </div>
       )}
@@ -225,7 +270,7 @@ export function PorteriaPanel() {
       <div style={{
         flex: 1,
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(5, 1fr)',
         gap: 16,
         padding: 20,
         alignItems: 'start',
