@@ -32,10 +32,13 @@ function matchBusqueda(ticket, q) {
   )
 }
 
+function fmtDatetime(iso) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
+
 function TicketCard({ ticket }) {
   const estado = ESTADOS.find(e => e.key === ticket.estado)
-  const hora   = ticket.estado === 'PENDIENTE' ? fmt(ticket.ts_solicitud) : fmt(ticket.ts_salida)
-  const etiq   = ticket.estado === 'PENDIENTE' ? 'Solicitado' : 'Salida'
 
   return (
     <div style={{
@@ -46,31 +49,58 @@ function TicketCard({ ticket }) {
       marginBottom: 8,
       display: 'flex',
       flexDirection: 'column',
-      gap: 4,
+      gap: 6,
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <span style={{ fontSize: 18, fontWeight: 700, color: '#111827', letterSpacing: '0.5px' }}>
+      {/* Nombre + placa */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: '#111827', lineHeight: 1.3 }}>
+          {ticket.colaborador_nombre}
+        </span>
+        <span style={{
+          background: '#f3f4f6', border: '1px solid #e5e7eb',
+          borderRadius: 6, padding: '2px 7px',
+          fontSize: 12, fontWeight: 700, color: '#374151',
+          whiteSpace: 'nowrap', letterSpacing: '0.5px',
+        }}>
           {ticket.vehiculo_placa ?? '—'}
         </span>
-        <span style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>
-          {fmtFecha(ticket.ts_solicitud)}
-        </span>
       </div>
-      <span style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>
-        {ticket.colaborador_nombre}
-      </span>
-      {ticket.destino && (
-        <span style={{ fontSize: 11, color: '#6b7280' }}>→ {ticket.destino}</span>
+
+      {/* Fecha solicitud */}
+      <div style={{ fontSize: 11, color: '#6b7280' }}>
+        📅 Solicitado: <strong>{fmtDatetime(ticket.ts_solicitud)}</strong>
+      </div>
+
+      {/* Salida */}
+      {ticket.ts_salida && (
+        <div style={{ fontSize: 11, color: '#6b7280' }}>
+          🚗 Salida: <strong>{fmtDatetime(ticket.ts_salida)}</strong>
+        </div>
       )}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-        <span style={{ fontSize: 10, color: '#9ca3af' }}>
-          {ticket.vehiculo_clase ?? ''}
-        </span>
-        <span style={{ fontSize: 11, color: '#6b7280' }}>
-          {etiq} {hora}
-        </span>
+
+      {/* Aprobación / jefe */}
+      {ticket.estado === 'PENDIENTE' && (
+        <div style={{ fontSize: 11, color: '#f59e0b', fontWeight: 600 }}>
+          ⏳ Pendiente de aprobación
+        </div>
+      )}
+      {ticket.jefe_nombre && ticket.estado !== 'PENDIENTE' && (
+        <div style={{ fontSize: 11, color: '#16a34a' }}>
+          ✅ Aprobado por: <strong>{ticket.jefe_nombre}</strong>
+        </div>
+      )}
+
+      {/* Retorno para CERRADO */}
+      {ticket.estado === 'CERRADO' && ticket.ts_retorno && (
+        <div style={{ fontSize: 11, color: '#6b7280' }}>
+          🏁 Regresó: <strong>{fmtDatetime(ticket.ts_retorno)}</strong>
+        </div>
+      )}
+
+      {/* ID ticket */}
+      <div style={{ fontSize: 10, color: '#d1d5db', marginTop: 2 }}>
+        {ticket.id}
       </div>
-      <span style={{ fontSize: 10, color: '#d1d5db' }}>{ticket.id}</span>
     </div>
   )
 }
