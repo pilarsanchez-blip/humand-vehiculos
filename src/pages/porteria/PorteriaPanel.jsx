@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { getTicketsActivos } from '../../lib/tickets'
 
 const REFRESH_INTERVAL = 12
@@ -151,7 +150,6 @@ function Columna({ estado, tickets }) {
 }
 
 export function PorteriaPanel() {
-  const navigate  = useNavigate()
   const [tickets,   setTickets]   = useState([])
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState('')
@@ -226,22 +224,6 @@ export function PorteriaPanel() {
           </div>
         </div>
 
-        <button
-          onClick={() => navigate('/porteria/salida')}
-          style={{
-            background: 'rgba(255,255,255,0.15)',
-            border: '1px solid rgba(255,255,255,0.3)',
-            color: '#fff',
-            borderRadius: 8,
-            padding: '8px 16px',
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          📷 Escanear
-        </button>
       </div>
 
       {/* Barra de progreso */}
@@ -261,7 +243,7 @@ export function PorteriaPanel() {
           <input
             value={busqueda}
             onChange={e => setBusqueda(e.target.value)}
-            placeholder="Buscar por nombre, apellido o número de ticket…"
+            placeholder="Buscar por nombre, apellido, placa o número de ticket…"
             style={{
               width: '100%',
               padding: '9px 12px 9px 36px',

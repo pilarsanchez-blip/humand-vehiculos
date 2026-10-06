@@ -62,6 +62,13 @@ function Guard({ children }) {
   return children
 }
 
+function GuardPorteria({ children }) {
+  const session = getSession()
+  if (!session) return <Navigate to="/login" replace />
+  if (session.rol !== 'porteria' && !session.esAdmin) return <Navigate to="/" replace />
+  return children
+}
+
 function RootRedirect() {
   const session = getSession()
   if (!session) return <Navigate to="/login" replace />
@@ -93,7 +100,7 @@ export default function App() {
         <Route path="/jefe/:id"          element={<Guard><JefeDetalle /></Guard>} />
         <Route path="/porteria/salida"   element={<Guard><PorteriaSalida /></Guard>} />
         <Route path="/porteria/retorno"  element={<Guard><PorteriaRetorno /></Guard>} />
-        <Route path="/porteria/panel"    element={<Guard><PorteriaPanel /></Guard>} />
+        <Route path="/porteria/panel"    element={<GuardPorteria><PorteriaPanel /></GuardPorteria>} />
         <Route path="/admin"             element={<Guard><Admin /></Guard>} />
       </Routes>
       <FloatingButtons />
