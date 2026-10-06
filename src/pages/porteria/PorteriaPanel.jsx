@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getTicketsActivos } from '../../lib/tickets'
 
 const REFRESH_INTERVAL = 12
@@ -150,6 +151,7 @@ function Columna({ estado, tickets }) {
 }
 
 export function PorteriaPanel() {
+  const navigate = useNavigate()
   const [tickets,   setTickets]   = useState([])
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState('')
@@ -214,6 +216,19 @@ export function PorteriaPanel() {
             Vista en tiempo real · {activos} ticket{activos !== 1 ? 's' : ''} activo{activos !== 1 ? 's' : ''}
           </div>
         </div>
+
+        <button
+          onClick={() => navigate('/porteria/salida')}
+          style={{
+            background: 'rgba(255,255,255,0.15)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            color: '#fff', borderRadius: 8,
+            padding: '8px 16px', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', whiteSpace: 'nowrap',
+          }}
+        >
+          📷 Escanear
+        </button>
 
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: 24, fontWeight: 300, letterSpacing: '1px' }}>

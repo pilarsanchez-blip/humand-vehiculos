@@ -73,8 +73,11 @@ function RootRedirect() {
   const session = getSession()
   if (!session) return <Navigate to="/login" replace />
   const { rol } = session
-  if (rol === 'jefe')     return <Navigate to="/jefe" replace />
-  if (rol === 'porteria') return <Navigate to="/porteria/salida" replace />
+  if (rol === 'jefe') return <Navigate to="/jefe" replace />
+  if (rol === 'porteria') {
+    const esPC = window.innerWidth >= 900
+    return <Navigate to={esPC ? '/porteria/panel' : '/porteria/salida'} replace />
+  }
   return <Navigate to="/mis-solicitudes" replace />
 }
 
