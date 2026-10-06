@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUsuario } from '../../hooks/useUsuario'
-import { getVehiculosPorSeccion, crearTicket } from '../../lib/tickets'
+import { getVehiculosPorSeccion, getPlacasOcupadas, crearTicket } from '../../lib/tickets'
 import { buscarColaboradores } from '../../lib/redash'
 import { Stepper } from '../../components/Stepper'
 import { PageHeader, Btn, Field, Input, Textarea, SummaryCard, SummaryRow, Banner, Spinner } from '../../components/UI'
@@ -27,8 +27,11 @@ export function SolicitudWizard() {
     setError('')
     setLoading(true)
     try {
-      const data = await getVehiculosPorSeccion(usuario.seccionIds)
-      setVehiculos(data)
+      const [todos, ocupadas] = await Promise.all([
+        getVehiculosPorSeccion(usuario.seccionIds),
+        getPlacasOcupadas(),
+      ])
+      setVehiculos(todos.filter(v => !ocupadas.has(v.placa)))
       setPaso(1)
     } catch (e) {
       setError('Error al cargar vehículos. Intentá de nuevo.')

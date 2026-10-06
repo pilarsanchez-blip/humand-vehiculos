@@ -141,6 +141,15 @@ export async function cerrarTicket(id, kmFinal, observaciones) {
   return data
 }
 
+export async function getPlacasOcupadas() {
+  const { data, error } = await supabase
+    .from('tickets')
+    .select('vehiculo_placa')
+    .in('estado', ['APROBADO', 'EN_VIAJE', 'COMPLETAR_DATOS'])
+  if (error) throw error
+  return new Set((data ?? []).map(t => t.vehiculo_placa))
+}
+
 export async function getTicketsActivos() {
   const { data, error } = await supabase
     .from('tickets')
