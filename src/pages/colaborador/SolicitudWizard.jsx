@@ -65,7 +65,7 @@ export function SolicitudWizard() {
   }
 
   function notificarBot(evento, ticketId) {
-    fetch('https://uasntnkbhtqkljfqfksv.supabase.co/functions/v1/bot-notificaciones', {
+    fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bot-notificaciones`, {
       method: 'POST',
       headers: {
         'Content-Type':  'application/json',
@@ -133,24 +133,50 @@ export function SolicitudWizard() {
             {vehiculos.length === 0 && (
               <Banner type="warn" icon="⚠️">No hay vehículos habilitados para tu sección.</Banner>
             )}
-            <div className={styles.vehicleList}>
-              {vehiculos.map(v => (
-                <div
-                  key={v.placa}
-                  className={[styles.vehicleCard, vehiculoSel?.placa === v.placa ? styles.selected : ''].join(' ')}
-                  onClick={() => setVehiculoSel(v)}
-                >
-                  <div className={styles.vehicleIcon}>🚙</div>
-                  <div className={styles.vehicleInfo}>
-                    <span className={styles.vehiclePlaca}>{v.placa}</span>
-                    <span className={styles.vehicleDet}>{v.marca} {v.tipo} · {v.anio}</span>
-                  </div>
-                  <div className={[styles.check, vehiculoSel?.placa === v.placa ? styles.checkOn : ''].join(' ')}>
-                    {vehiculoSel?.placa === v.placa && '✓'}
-                  </div>
+            {usuario.seccionesInfo?.length > 1
+              ? usuario.seccionesInfo
+                  .map(si => {
+                    const vsec = vehiculos.filter(v => v.seccion === si.nombre)
+                    if (!vsec.length) return null
+                    const label = si.grupo === 'SECCIONES' ? 'Tu sección'
+                      : si.grupo === 'DEPARTAMENTOS' ? 'Tu departamento'
+                      : si.grupo === 'GERENCIAS' ? 'Tu gerencia'
+                      : 'Tu unidad'
+                    return (
+                      <div key={si.id} style={{ marginBottom: 8 }}>
+                        <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-lighter)', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '8px 0 4px' }}>
+                          {label} · {si.nombre}
+                        </p>
+                        <div className={styles.vehicleList}>
+                          {vsec.map(v => (
+                            <div key={v.placa} className={[styles.vehicleCard, vehiculoSel?.placa === v.placa ? styles.selected : ''].join(' ')} onClick={() => setVehiculoSel(v)}>
+                              <div className={styles.vehicleIcon}>🚙</div>
+                              <div className={styles.vehicleInfo}>
+                                <span className={styles.vehiclePlaca}>{v.placa}</span>
+                                <span className={styles.vehicleDet}>{v.marca} {v.tipo} · {v.anio}</span>
+                              </div>
+                              <div className={[styles.check, vehiculoSel?.placa === v.placa ? styles.checkOn : ''].join(' ')}>{vehiculoSel?.placa === v.placa && '✓'}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })
+              : (
+                <div className={styles.vehicleList}>
+                  {vehiculos.map(v => (
+                    <div key={v.placa} className={[styles.vehicleCard, vehiculoSel?.placa === v.placa ? styles.selected : ''].join(' ')} onClick={() => setVehiculoSel(v)}>
+                      <div className={styles.vehicleIcon}>🚙</div>
+                      <div className={styles.vehicleInfo}>
+                        <span className={styles.vehiclePlaca}>{v.placa}</span>
+                        <span className={styles.vehicleDet}>{v.marca} {v.tipo} · {v.anio}</span>
+                      </div>
+                      <div className={[styles.check, vehiculoSel?.placa === v.placa ? styles.checkOn : ''].join(' ')}>{vehiculoSel?.placa === v.placa && '✓'}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )
+            }
             <Field label="Kilometraje inicial" hint="Ingresá el km del odómetro antes de salir">
               <Input
                 type="number"
@@ -192,7 +218,7 @@ export function SolicitudWizard() {
           {paso < 3 && (
             <Btn variant="primary" onClick={() => {
               if (paso === 0) irPaso1()
-              else if (paso === 1 && (!vehiculoSel || !kmInicial)) setError('Seleccioná un vehículo e ingresá el KM')
+              else if (paso === 1 && (!vehiculoSel || !kmInicial || isNaN(parseInt(kmInicial)))) setError('Seleccioná un vehículo e ingresá el KM (solo números)')
               else if (paso === 2) {
                 if (!validarAcompanantes()) return
                 setError(''); setPaso(p => p + 1)

@@ -32,9 +32,13 @@ export function JefeDetalle() {
     try {
       const fn = tipo === 'aprobar' ? aprobarTicket : rechazarTicket
       await fn(id, usuario.userId, usuario.nombre, comentario)
-      fetch('https://uasntnkbhtqkljfqfksv.supabase.co/functions/v1/bot-notificaciones', {
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/bot-notificaciones`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'apikey':        import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
         body: JSON.stringify({ evento: tipo === 'aprobar' ? 'APROBADO' : 'RECHAZADO', ticketId: id }),
       }).catch(() => {})
       navigate('/jefe')

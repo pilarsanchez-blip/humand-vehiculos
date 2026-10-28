@@ -28,11 +28,10 @@ serve(async (req) => {
     const userData = await userRes.json()
 
     const segmentaciones = userData.segmentations ?? []
-    const GRUPOS = ['DEPARTAMENTOS', 'SECCIONES', 'GERENCIAS']
-
+    const GRUPOS = ['SECCIONES', 'DEPARTAMENTOS', 'GERENCIAS', 'UNIDADES']
     const seccionNombres = segmentaciones
-      .filter((s) => GRUPOS.includes(s.group))
-      .map((s) => s.item)
+      .filter((s: any) => GRUPOS.includes(s.group))
+      .map((s: any) => s.item)
       .filter(Boolean)
 
     const seccion =
@@ -58,11 +57,18 @@ serve(async (req) => {
       }
     )
     const mapData = await mapRes.json()
-    const seccionIds = Array.isArray(mapData)
-      ? mapData.map((r) => r.segmentation_item_id)
+    const PRIORIDAD_GRUPO = ['SECCIONES', 'DEPARTAMENTOS', 'GERENCIAS', 'UNIDADES']
+    const seccionesInfo = Array.isArray(mapData)
+      ? mapData
+          .map((r: any) => {
+            const seg = segmentaciones.find((s: any) => s.item === r.seccion_spreadsheet)
+            return { id: r.segmentation_item_id, nombre: r.seccion_spreadsheet, grupo: seg?.group ?? '' }
+          })
+          .sort((a: any, b: any) => PRIORIDAD_GRUPO.indexOf(a.grupo) - PRIORIDAD_GRUPO.indexOf(b.grupo))
       : []
+    const seccionIds = seccionesInfo.map((r: any) => r.id)
 
-    return new Response(JSON.stringify({ seccionIds, seccion, jefeInternalId }), {
+    return new Response(JSON.stringify({ seccionIds, seccionesInfo, seccion, jefeInternalId }), {
       status: 200,
       headers: { ...CORS, 'Content-Type': 'application/json' },
     })

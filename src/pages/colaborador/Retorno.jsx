@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getTicket, cerrarTicket } from '../../lib/tickets'
+import { useUsuario } from '../../hooks/useUsuario'
 import { Timeline } from '../../components/Timeline'
 import { PageHeader, Btn, Field, Input, Textarea, SummaryCard, SummaryRow, Banner, Spinner } from '../../components/UI'
 import styles from './Retorno.module.css'
@@ -8,6 +9,7 @@ import styles from './Retorno.module.css'
 export function Retorno() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const usuario = useUsuario()
   const [ticket, setTicket]   = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState(false)
@@ -18,7 +20,13 @@ export function Retorno() {
 
   useEffect(() => {
     getTicket(id)
-      .then(setTicket)
+      .then(t => {
+        if (t && usuario && String(t.colaborador_id) !== String(usuario.userId)) {
+          navigate('/mis-solicitudes')
+          return
+        }
+        setTicket(t)
+      })
       .catch(() => setError('No se pudo cargar el ticket.'))
       .finally(() => setLoading(false))
   }, [id])

@@ -17,7 +17,7 @@ export async function getVehiculosPorSeccion(seccionIds) {
 
   const { data: vehiculos, error: err2 } = await supabase
     .from('vehiculos')
-    .select('placa, clase, marca, tipo, anio, km_acumulado, km_proximo_service')
+    .select('placa, clase, marca, tipo, anio, km_acumulado, km_proximo_service, seccion')
     .in('seccion', secciones)
     .eq('activo', true)
     .order('placa')
@@ -52,6 +52,7 @@ export async function getTicketsPendientesJefe(jefeId) {
   const { data, error } = await supabase
     .from('tickets')
     .select('*')
+    .eq('jefe_id', jefeId)
     .order('ts_solicitud', { ascending: false })
   if (error) throw error
   return data

@@ -35,6 +35,7 @@ export async function refreshSession() {
     saveSession({
       ...session,
       seccionIds:     data.seccionIds ?? session.seccionIds,
+      seccionesInfo:  data.seccionesInfo ?? session.seccionesInfo,
       seccion:        data.seccion ?? session.seccion,
       jefeInternalId: data.jefeInternalId ?? session.jefeInternalId,
     })
