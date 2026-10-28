@@ -64,6 +64,7 @@ export default function Login() {
         esAdmin,
         token:              data.accessToken,
         seccionIds:         data.seccionIds ?? [],
+        seccionesInfo:      data.seccionesInfo ?? [],
         seccion:            data.seccion ?? '',
         jefeInternalId:     data.jefeInternalId ?? null,
       })
