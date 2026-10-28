@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUsuario } from '../../hooks/useUsuario'
-import { getSubordinados } from '../../lib/redash'
-import { supabase } from '../../lib/supabase'
+import { getTicketsPendientesJefe } from '../../lib/tickets'
 import { PageHeader, StatusBadge, Spinner, Banner, Btn } from '../../components/UI'
 import styles from './Jefe.module.css'
 
@@ -20,24 +19,8 @@ export function JefeLista() {
   async function cargar() {
     setLoading(true)
     try {
-      // Traer IDs de subordinados desde Redash
-      const subordinadoIds = await getSubordinados(usuario.userId)
-
-      if (subordinadoIds.length === 0) {
-        setTickets([])
-        setLoading(false)
-        return
-      }
-
-      // Traer tickets de esos colaboradores
-      const { data, error } = await supabase
-        .from('tickets')
-        .select('*')
-        .in('colaborador_id', subordinadoIds)
-        .order('ts_solicitud', { ascending: false })
-
-      if (error) throw error
-      setTickets(data ?? [])
+      const data = await getTicketsPendientesJefe(usuario.userId)
+      setTickets(data)
     } catch (e) {
       setError('Error al cargar solicitudes.')
     } finally {
