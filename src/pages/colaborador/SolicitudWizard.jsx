@@ -24,6 +24,10 @@ export function SolicitudWizard() {
 
   async function irPaso1() {
     if (!fechaSalida || !horaSalida) { setError('Completá fecha y hora de salida'); return }
+    if (!usuario.seccionIds?.length) {
+      setError('Tu sesión está desactualizada. Cerrá sesión y volvé a entrar para continuar.')
+      return
+    }
     setError('')
     setLoading(true)
     try {
