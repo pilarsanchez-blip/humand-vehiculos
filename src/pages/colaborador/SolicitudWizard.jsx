@@ -203,9 +203,10 @@ export function SolicitudWizard() {
               <SummaryRow label="KM inicial"      value={`${kmInicial} km`} />
               <SummaryRow label="Acompañantes"    value={acompanantes.length > 0 ? acompanantes.map(a => a.nombre).join(', ') : 'Ninguno'} />
             </SummaryCard>
-            <Banner type="warn" icon="⚠️">
-              Tu jefe recibirá una notificación para aprobar esta solicitud.
-            </Banner>
+            {usuario.jefeInternalId
+              ? <Banner type="warn" icon="⚠️">Tu jefe recibirá una notificación para aprobar esta solicitud.</Banner>
+              : <Banner type="warn" icon="⚠️">No tenés jefe asignado en el sistema. Tu solicitud quedará pendiente hasta que un jefe la apruebe manualmente. Contactá a RRHH si esto es un error.</Banner>
+            }
           </>
         )}
       </div>

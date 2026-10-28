@@ -104,9 +104,11 @@ export async function confirmarSalida(id, porteroId, porteroNombre) {
       portero_salida_nombre: porteroNombre,
     })
     .eq('id', id)
+    .eq('estado', 'APROBADO')
     .select()
     .single()
   if (error) throw error
+  if (!data) throw new Error('El ticket ya fue procesado o no está en estado APROBADO.')
   return data
 }
 
@@ -120,9 +122,11 @@ export async function confirmarLlegada(id, porteroId, porteroNombre) {
       portero_retorno_nombre: porteroNombre,
     })
     .eq('id', id)
+    .eq('estado', 'EN_VIAJE')
     .select()
     .single()
   if (error) throw error
+  if (!data) throw new Error('El ticket ya fue procesado o no está en estado EN_VIAJE.')
   return data
 }
 
