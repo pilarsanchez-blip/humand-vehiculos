@@ -131,9 +131,9 @@ function TicketCard({ ticket, expanded, onToggle, onRetorno }) {
             </div>
           )}
 
-          {ticket.estado === 'CERRADO' && ticket.km_recorridos && (
+          {ticket.estado === 'CERRADO' && ticket.km_final != null && ticket.km_inicial != null && (
             <div className={styles.resumen}>
-              <span>KM recorridos: <strong>{ticket.km_recorridos} km</strong></span>
+              <span>KM recorridos: <strong>{ticket.km_final - ticket.km_inicial} km</strong></span>
               {ticket.observaciones && <span>Obs: {ticket.observaciones}</span>}
             </div>
           )}

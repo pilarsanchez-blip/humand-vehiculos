@@ -131,7 +131,7 @@ export function SolicitudWizard() {
           <>
             <p className={styles.secTitle}>{vehiculos.length} vehículos disponibles</p>
             {vehiculos.length === 0 && (
-              <Banner type="warn" icon="⚠️">No hay vehículos habilitados para tu sección.</Banner>
+              <Banner type="warn" icon="⚠️">No hay vehículos habilitados para tu sección. Contactá a tu área para que asignen uno.</Banner>
             )}
             {usuario.seccionesInfo?.length > 1
               ? usuario.seccionesInfo
@@ -216,7 +216,7 @@ export function SolicitudWizard() {
             <Btn variant="secondary" onClick={() => setPaso(p => p - 1)}>← Atrás</Btn>
           )}
           {paso < 3 && (
-            <Btn variant="primary" onClick={() => {
+            <Btn variant="primary" disabled={paso === 1 && vehiculos.length === 0} onClick={() => {
               if (paso === 0) irPaso1()
               else if (paso === 1 && (!vehiculoSel || !kmInicial || isNaN(parseInt(kmInicial)))) setError('Seleccioná un vehículo e ingresá el KM (solo números)')
               else if (paso === 2) {
